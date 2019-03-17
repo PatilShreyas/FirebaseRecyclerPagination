@@ -1,0 +1,77 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 2
+        versionName "0.5-beta"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    //RecyclerView
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+
+    //For Mixing version error
+    implementation 'com.android.support:asynclayoutinflater:28.0.0'
+    implementation 'com.android.support:support-fragment:28.0.0'
+    implementation 'com.android.support:support-media-compat:28.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
+
+    //Paging Libray
+    implementation "android.arch.paging:runtime:1.0.1"
+
+    //View model
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation "android.arch.lifecycle:viewmodel:1.1.1"
+
+    //Firebase Database
+    implementation 'com.google.firebase:firebase-database:16.1.0'
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'FirebaseRecyclerPagination'
+
+    publishedGroupId = 'com.shreyaspatil'
+    libraryName = 'FirebaseRecyclerPagination'
+    artifact = 'FirebaseRecyclerPagination'
+    libraryDescription = 'Android Library to implement Pagination in Firebase Realtime Database with RecyclerView'
+
+
+    // Your github repo link
+    siteUrl = 'https://github.com/patilshreyas/FirebaseRecyclerPagination'
+    gitUrl = 'https://github.com/patilshreyas/FirebaseRecyclerPagination.git'
+    githubRepository= 'patilshreyas/FirebaseRecyclerPagination'
+
+    libraryVersion = '0.5-beta'
+
+    developerId = 'patilshreyas'
+    developerName = 'Shreyas Patil'
+    developerEmail = 'shreyaspatilg@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/bintrayv1.gradle'
