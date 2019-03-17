@@ -38,3 +38,6 @@ dependencies {
     implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.5-beta'
 }
 ```
+
+## Contribution
+We'll love to make it happen. Let's make library more perfect, powerful and useful for everyone!

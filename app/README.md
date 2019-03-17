@@ -22,8 +22,7 @@ dependencies {
 ```
 ### App
 In this app, you are showing paginated list of Posts. Posts will load in RecyclerView
-#### Data Model Class
-Post.class
+#### Data Model Class (Post.class)
 ```java
 public class Post {
     public String title;
@@ -40,7 +39,7 @@ public class Post {
 
 ### MainActivity.java
 
-####Declarations
+#### Declarations
 ```java
 public class MainActivity extends AppCompatActivity {
 
@@ -89,17 +88,17 @@ FirebasePagingAdapter is built on the top of Android Architecture Components - P
 To implement, you should already have ViewHolder subclass. Here We used ItemViewHolder class.
 ```java
         mAdapter = new FirebaseRecyclerPagingAdapter<Post, ItemViewHolder>(options) {
-                    @NonNull
-                    @Override
-                    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                        return new ItemViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false));
-                    }
-        
-                    @Override
-                    protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Post model) {
-                        holder.setItem(model);
-                    }
-                };
+            @NonNull
+            @Override
+            public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new ItemViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false));
+            }
+    
+            @Override
+            protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Post model) {
+                holder.setItem(model);
+            }
+        };
 ```
 
 #### Set Adapter
@@ -109,35 +108,34 @@ Finally, Set adapter to RecyclerView.
 ```
 
 #### Listener for Paging events
-- onLoading() - Will invoked every time when data is to be loading in RecyclerView.
-- onLoaded() - Will Invoked every time when data is successfully loaded in RecyclerView.
+This is optional. After setting up the StateChangedListener it will respond to changes in RecyclerView events.
 ```java
         mAdapter.setStateChangedListener(new StateChangedListener() {
-                   @Override
-                   public void onInitLoading() {
-                       //First Time Loading. Do Animation
-                   }
-       
-                   @Override
-                   public void onLoading() {
-                       //When Loading Every Time. Do Animation
-                   }
-       
-                   @Override
-                   public void onLoaded() {
-                       //When Items are loaded in RecyclerView
-                   }
-       
-                   @Override
-                   public void onFinished() {
-                       //When Items are fully loaded. List Ends.
-                   }
-       
-                   @Override
-                   public void onError() {
-                       //When Error is Occured.
-                   }
-               });
+               @Override
+               public void onInitLoading() {
+                   //First Time Loading. Do Animation
+               }
+        
+               @Override
+               public void onLoading() {
+                   //When Loading Every Time. Do Animation
+               }
+        
+               @Override
+               public void onLoaded() {
+                   //When Items are loaded in RecyclerView
+               }
+        
+               @Override
+               public void onFinished() {
+                   //When Items are fully loaded. List Ends.
+               }
+        
+               @Override
+               public void onError() {
+                   //When Error is Occured.
+               }
+           });
 ```
 
 #### Lifecycle
@@ -157,6 +155,6 @@ At last, To begin populating data, call startListening() method. stopListening()
         mAdapter.stopListening();
     }
 ```
-- Thus, we have implemented Firebase Recycler Pagination.
--Thank You !
+Thus, we have implemented Firebase Recycler Pagination.
+Thank You !
 
