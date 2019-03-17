@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         //Set Adapter to RecyclerView
         mRecyclerView.setAdapter(mAdapter);
 
-        //Callback Listener for State of RecyclerView
+        //Paging Event Listener for State of RecyclerView
         mAdapter.setStateChangedListener(new StateChangedListener() {
             @Override
             public void onInitLoading() {
