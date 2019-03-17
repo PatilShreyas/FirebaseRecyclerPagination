@@ -29,8 +29,6 @@ allprojects {
 }
 ```
 Open Build.gradle file of app module and then...
-```
-
 ```groovy
 dependencies {
     //Android Paging Libray
