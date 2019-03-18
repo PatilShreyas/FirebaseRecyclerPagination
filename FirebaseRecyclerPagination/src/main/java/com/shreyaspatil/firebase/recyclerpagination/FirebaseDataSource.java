@@ -15,13 +15,22 @@ import com.google.firebase.database.annotations.NotNull;
 
 import java.util.ArrayList;
 
+/**
+ * Data source to power a {@link FirebaseRecyclerPagingAdapter}.
+ *
+ * Note: although loadInitial, loadBefore, and loadAfter are not called on the main thread by the
+ *       paging library, we treat them as if they were so that we can facilitate retry without
+ *       managing our own thread pool or requiring the user to pass us an executor.
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
 
     private Query mQuery;
     private Class<T> mClass;
-    private String mLastKey;
+    private ArrayList<String> mKeyList;
+
     private final MutableLiveData<LoadingState> mLoadingState = new MutableLiveData<>();
+    private final MutableLiveData<ArrayList<String>> mKeyLiveData = new MutableLiveData<>();
 
 
     private static final String TAG = "FirebaseDataSource";
@@ -46,6 +55,7 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
     FirebaseDataSource(Query mQuery, Class<T> modelClass){
         this.mQuery = mQuery;
         this.mClass = modelClass;
+        mKeyList = new ArrayList<>();
     }
 
     @Override
@@ -57,16 +67,17 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
         mInitQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<T> mList = new ArrayList<T>();
+                ArrayList<T> mDataList = new ArrayList<T>();
                 for(DataSnapshot ds : dataSnapshot.getChildren()) {
                     T data = ds.getValue(mClass);
-                    mLastKey = ds.getKey();
-                    mList.add(data);
+                    String key = ds.getKey();
+                    mKeyList.add(key);
+                    mDataList.add(data);
                 }
 
                 //Initial Load Success
                 mLoadingState.postValue(LoadingState.LOADED);
-                callback.onResult(mList,mLastKey,mLastKey);
+                callback.onResult(mDataList,mKeyList.get(mKeyList.size() - 1),mKeyList.get(mKeyList.size() - 1));
             }
 
             @Override
@@ -92,13 +103,22 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 ArrayList<T> mList = new ArrayList<T>();
-                int c=0;
+                boolean isFirstItem = true;
+
                 for(DataSnapshot ds : dataSnapshot.getChildren()) {
                     T data = ds.getValue(mClass);
-                    mLastKey = ds.getKey();
-                    if(c!=0)
+                    String key = ds.getKey();
+
+                    /***
+                     *Check for first Item.
+                     * Because in Firebase Database there is no query for startAfter(key).
+                     * So we're ignoring first data item
+                    */
+                     if(!isFirstItem) {
                         mList.add(data);
-                    c++;
+                        mKeyList.add(key);
+                    }
+                    isFirstItem = false;
                 }
 
                 mLoadingState.postValue(LoadingState.LOADED);
@@ -107,7 +127,8 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
                 if(mList.isEmpty())
                     mLoadingState.postValue(LoadingState.FINISHED);
 
-                callback.onResult(mList,mLastKey);
+                callback.onResult(mList,mKeyList.get(mKeyList.size() - 1));
+
             }
 
             @Override
@@ -120,5 +141,10 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
     @NonNull
     public LiveData<LoadingState> getLoadingState() {
         return mLoadingState;
+    }
+
+    public LiveData<ArrayList<String>> getKeyList(){
+        mKeyLiveData.postValue(mKeyList);
+        return mKeyLiveData;
     }
 }

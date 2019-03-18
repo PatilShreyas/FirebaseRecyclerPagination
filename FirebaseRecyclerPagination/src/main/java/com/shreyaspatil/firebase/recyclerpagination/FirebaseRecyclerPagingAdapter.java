@@ -16,14 +16,22 @@ import android.support.v7.widget.RecyclerView;
 import com.google.firebase.database.annotations.NotNull;
 import com.shreyaspatil.firebase.recyclerpagination.listener.StateChangedListener;
 
+import java.util.ArrayList;
 
-public abstract class FirebaseRecyclerPagingAdapter<T,H extends RecyclerView.ViewHolder> extends PagedListAdapter<T,H> implements LifecycleObserver{
+/**
+ * Paginated RecyclerView Adapter for a Firebase Realtime Database query.
+ *
+ * Configured with {@link FirebasePagingOptions}.
+ */
+public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.ViewHolder> extends PagedListAdapter<T,VH> implements LifecycleObserver{
 
     private final String TAG = "PagingAdapter";
     private final LiveData<PagedList<T>> mPagedList;
     private final LiveData<LoadingState> mLoadingState;
+    private final LiveData<ArrayList<String>> mKeyListLiveData;
     private final LiveData<FirebaseDataSource> mDataSource;
     private StateChangedListener mListener;
+    private ArrayList<String> mKeyList;
 
     //State Observer
     private final Observer<LoadingState> mStateObserver = new Observer<LoadingState>() {
@@ -50,11 +58,20 @@ public abstract class FirebaseRecyclerPagingAdapter<T,H extends RecyclerView.Vie
             if (snapshots == null) {
                 return;
             }
-
             submitList(snapshots);
         }
     };
 
+    //Item Keys Observer
+    private final Observer<ArrayList<String>> mKeysObserver = new Observer<ArrayList<String>>() {
+        @Override
+        public void onChanged(@Nullable ArrayList<String> keyList) {
+            mKeyList = keyList;
+        }
+    };
+    /**
+     * Construct a new FirestorePagingAdapter from the given {@link FirebasePagingOptions}.
+     */
     public FirebaseRecyclerPagingAdapter(FirebasePagingOptions options){
         super(options.getDiffCallback());
 
@@ -79,37 +96,63 @@ public abstract class FirebaseRecyclerPagingAdapter<T,H extends RecyclerView.Vie
                     }
                 });
 
+        //Init Key List
+        mKeyListLiveData = Transformations.switchMap(mPagedList,
+                new Function<PagedList<T>, LiveData<ArrayList<String>>>() {
+                    @Override
+                    public LiveData<ArrayList<String>> apply(PagedList<T> input) {
+                        FirebaseDataSource dataSource = (FirebaseDataSource) input.getDataSource();
+                        return dataSource.getKeyList();
+                    }
+                });
+
         if (options.getOwner() != null) {
             options.getOwner().getLifecycle().addObserver(this);
         }
 
     }
 
-    //Start Listening
+    /**
+     * Start listening to paging / scrolling events and populating adapter data.
+     */
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     public void startListening() {
         mPagedList.observeForever(mDataObserver);
         mLoadingState.observeForever(mStateObserver);
+        mKeyListLiveData.observeForever(mKeysObserver);
     }
 
-    //Stop Listening
+    /**
+     * Unsubscribe from paging / scrolling events, no more data will be populated, but the existing
+     * data will remain.
+     */
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     public void stopListening() {
         mPagedList.removeObserver(mDataObserver);
         mLoadingState.removeObserver(mStateObserver);
+        mKeyListLiveData.removeObserver(mKeysObserver);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull H viewHolder, int position) {
+    public void onBindViewHolder(@NonNull VH viewHolder, int position) {
         T model = getItem(position);
-        onBindViewHolder(viewHolder, position, model);
+        String key = mKeyList.get(position);
+        onBindViewHolder(viewHolder, position, key, model);
     }
 
-    protected abstract void onBindViewHolder(@NonNull H viewHolder, int position, @NotNull T model);
+    /**
+     * @param model the model object containing the data that should be used to populate the view.
+     * @see #onBindViewHolder(RecyclerView.ViewHolder, int)
+     */
+    protected abstract void onBindViewHolder(@NonNull VH viewHolder, int position, @NotNull String key, @NotNull T model);
 
+    /**
+     * Called whenever the loading state of the adapter changes.
+     *
+     * When the state is {@link LoadingState#ERROR} the adapter will stop loading any data
+     */
     public void setStateChangedListener(StateChangedListener mListener){
         this.mListener = mListener;
     }
-
 
 }

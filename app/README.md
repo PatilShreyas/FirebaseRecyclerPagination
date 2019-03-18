@@ -17,7 +17,7 @@ dependencies {
     implementation "android.arch.paging:runtime:1.0.1"
     
     //Firebase Pagination Library
-    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.5-beta'
+    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.6-beta'
 }
 ```
 ### App
@@ -59,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
            //Initialize RecyclerView
            mRecyclerView = findViewById(R.id.recycler_view);
            mRecyclerView.setHasFixedSize(true);
-           mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+           
+           LinearLayoutManager mManager = new LinearLayoutManager(this);
+           mRecyclerView.setLayoutManager(mManager);
    
            //Initialize Database
            mDatabase = FirebaseDatabase.getInstance().getReference().child("posts");
@@ -86,6 +88,7 @@ FirebasePagingOptions<Post> options = new FirebasePagingOptions.Builder<Post>()
 #### Init Adapter
 FirebasePagingAdapter is built on the top of Android Architecture Components - Paging Support Library.
 To implement, you should already have ViewHolder subclass. Here We used ItemViewHolder class.
+
 ```java
         mAdapter = new FirebaseRecyclerPagingAdapter<Post, ItemViewHolder>(options) {
             @NonNull
@@ -95,7 +98,7 @@ To implement, you should already have ViewHolder subclass. Here We used ItemView
             }
     
             @Override
-            protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Post model) {
+            protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NotNull String key, @NonNull Post model) {
                 holder.setItem(model);
             }
         };

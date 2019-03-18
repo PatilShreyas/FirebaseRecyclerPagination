@@ -10,13 +10,20 @@ import android.support.v7.util.DiffUtil;
 
 import com.google.firebase.database.Query;
 
+/**
+ * Options to configure an {@link FirebaseRecyclerPagingAdapter}.
+ *
+ * Use {@link Builder} to create a new instance.
+ */
 public final class FirebasePagingOptions<T> {
 
     private final LiveData<PagedList<T>> mData;
     private final DiffUtil.ItemCallback<T> mDiffCallback;
     private final LifecycleOwner mOwner;
 
-    private FirebasePagingOptions(@NonNull LiveData<PagedList<T>> data, @NonNull DiffUtil.ItemCallback<T> diffCallback, @Nullable LifecycleOwner owner) {
+    private FirebasePagingOptions(@NonNull LiveData<PagedList<T>> data,
+                                  @NonNull DiffUtil.ItemCallback<T> diffCallback,
+                                  @Nullable LifecycleOwner owner) {
         mData = data;
         mDiffCallback = diffCallback;
         mOwner = owner;
@@ -37,13 +44,24 @@ public final class FirebasePagingOptions<T> {
         return mOwner;
     }
 
+    /**
+     * Builder for {@link FirebasePagingOptions}.
+     */
     public static final class Builder<T> {
 
         private LiveData<PagedList<T>> mData;
         private LifecycleOwner mOwner;
         private DiffUtil.ItemCallback<T> mDiffCallback;
 
-
+        /**
+         * Sets the Firestore query to paginate.
+         *
+         * @param query the FirebaseDatabase query. This query should only contain orderByKey(), orderByChild() and
+         *              orderByValue() clauses. Any limit will cause an error such as limitToLast() or limitToFirst().
+         * @param config paging configuration, passed directly to the support paging library.
+         * @param modelClass the model class of data to parse into object.
+         * @return this, for chaining.
+         */
         @NonNull
         public Builder<T> setQuery(@NonNull Query query, @NonNull PagedList.Config config, @NonNull Class<T> modelClass) {
             FirebaseDataSource.Factory factory = new FirebaseDataSource.Factory(query,modelClass);
@@ -51,20 +69,35 @@ public final class FirebasePagingOptions<T> {
             return this;
         }
 
-
+        /**
+         * Sets an optional custom {@link DiffUtil.ItemCallback} to compare
+         * {@link T} objects.
+         *
+         * @return this, for chaining.
+         */
         @NonNull
         public Builder<T> setDiffCallback(@NonNull DiffUtil.ItemCallback<T> diffCallback) {
             mDiffCallback = diffCallback;
             return this;
         }
 
+
+        /**
+         * Sets an optional {@link LifecycleOwner} to control the lifecycle of the adapter. Otherwise,
+         * you must manually call {@link FirebaseRecyclerPagingAdapter#startListening()}
+         * and {@link FirebaseRecyclerPagingAdapter#stopListening()}.
+         *
+         * @return this, for chaining.
+         */
         @NonNull
         public Builder<T> setLifecycleOwner(@NonNull LifecycleOwner owner) {
             mOwner = owner;
             return this;
         }
 
-        //This will make instance of FirebasePagingOptions
+        /**
+         * Build the {@link FirebasePagingOptions} object.
+         */
         @NonNull
         public FirebasePagingOptions<T> build() {
             if (mData == null) {

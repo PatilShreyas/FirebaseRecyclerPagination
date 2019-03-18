@@ -17,6 +17,7 @@ import android.widget.EditText;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.annotations.NotNull;
 import com.shreyaspatil.firebase.recyclerpagination.FirebasePagingOptions;
 import com.shreyaspatil.firebase.recyclerpagination.FirebaseRecyclerPagingAdapter;
 import com.shreyaspatil.firebase.recyclerpagination.listener.StateChangedListener;
@@ -37,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
         //Initialize RecyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        LinearLayoutManager mManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mManager);
 
         //Initialize Database
         mDatabase = FirebaseDatabase.getInstance().getReference().child("posts");
@@ -64,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull Post model) {
+            protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull String key, @NotNull Post model) {
                 holder.setItem(model);
             }
         };

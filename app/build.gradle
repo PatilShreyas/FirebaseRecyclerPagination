@@ -41,12 +41,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.7'
 
     //Firebase Recycler Pagination Library
-     implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.5-beta'
+     implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.6-beta'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-   // implementation project(':FirebaseRecyclerPagination')
+    //implementation project(':FirebaseRecyclerPagination')
 }
 apply plugin: 'com.google.gms.google-services'
