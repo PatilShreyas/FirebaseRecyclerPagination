@@ -4,11 +4,6 @@
 
 Here is Android library to implement Pagination of Firebase Realtime Database in RecyclerView.
 
-## Things To Do
-- [X] Pagination for Up-Down List.
-- [X] Implementation Using Android Architecture Components.
-- [ ] Pagination for Down-Up (Reversed) List.
-
 ## Sample App
 The Sample app is available in [`app/`](app) directory that demonstrates feature of this library.
 
