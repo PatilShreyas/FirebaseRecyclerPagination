@@ -2,8 +2,8 @@
     "name": "Firebase Database RecyclerView Pagination",
     "platforms": ["Android"],
     "content": "README.md",
-    "pages" : [
-		"app/README.md": "Sample App"
-	],
+    "pages" : {
+      "app/README.md": "Sample App"
+    },
     "related": []
 }

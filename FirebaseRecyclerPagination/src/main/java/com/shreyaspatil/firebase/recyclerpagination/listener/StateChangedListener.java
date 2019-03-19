@@ -7,5 +7,5 @@ public interface StateChangedListener {
     void onLoading();
     void onLoaded();
     void onFinished();
-    void onError();
+    void onError(DatabaseError databaseError);
 }

@@ -29,11 +29,11 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
     private Class<T> mClass;
     private ArrayList<String> mKeyList;
 
-    private final MutableLiveData<LoadingState> mLoadingState = new MutableLiveData<>();
-    private final MutableLiveData<ArrayList<String>> mKeyLiveData = new MutableLiveData<>();
-
-
     private static final String TAG = "FirebaseDataSource";
+
+    private final MutableLiveData<LoadingState> mLoadingState = new MutableLiveData<>();
+    private final MutableLiveData<DatabaseError> mError = new MutableLiveData<>();
+    private final MutableLiveData<ArrayList<String>> mKeyLiveData = new MutableLiveData<>();
 
     public static class Factory<T> extends DataSource.Factory<String, Class<T>> {
 
@@ -83,6 +83,7 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 //Error Occured
+                mError.postValue(databaseError);
                 mLoadingState.postValue(LoadingState.ERROR);
             }
         });
@@ -90,7 +91,7 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
 
     @Override
     public void loadBefore(@NonNull LoadParams<String> params, @NonNull LoadCallback<String, T> callback) {
-        //Pending
+        // Ignored for now, since we only ever append to the initial load.
     }
 
     @Override
@@ -98,7 +99,8 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
         // Set loading state
         mLoadingState.postValue(LoadingState.LOADING_MORE);
 
-        Query mNewQuery = mQuery.startAt(null,params.key).limitToFirst(params.requestedLoadSize);
+        //Load params.requestedLoadSize+1 because, first data item is getting ignored.
+        Query mNewQuery = mQuery.startAt(null,params.key).limitToFirst(params.requestedLoadSize+1);
         mNewQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -109,10 +111,10 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
                     T data = ds.getValue(mClass);
                     String key = ds.getKey();
 
-                    /***
-                     *Check for first Item.
-                     * Because in Firebase Database there is no query for startAfter(key).
-                     * So we're ignoring first data item
+                    /*
+                      Check for first Item.
+                      Because in Firebase Database there is no query for startAfter(key).
+                      So we're ignoring first data item
                     */
                      if(!isFirstItem) {
                         mList.add(data);
@@ -133,6 +135,7 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+                mError.postValue(databaseError);
                 mLoadingState.postValue(LoadingState.ERROR);
             }
         });
@@ -146,5 +149,9 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
     public LiveData<ArrayList<String>> getKeyList(){
         mKeyLiveData.postValue(mKeyList);
         return mKeyLiveData;
+    }
+
+    public LiveData<DatabaseError> getLastError(){
+        return mError;
     }
 }

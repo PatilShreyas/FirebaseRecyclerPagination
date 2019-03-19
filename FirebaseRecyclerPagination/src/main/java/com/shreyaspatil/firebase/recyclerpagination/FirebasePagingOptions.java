@@ -107,12 +107,12 @@ public final class FirebasePagingOptions<T> {
             if (mDiffCallback == null) {
                 mDiffCallback = new DiffUtil.ItemCallback<T>() {
                     @Override
-                    public boolean areItemsTheSame(T oldItem, T newItem) {
+                    public boolean areItemsTheSame(@NonNull T oldItem, @NonNull T newItem) {
                         return oldItem.equals(newItem);
                     }
 
                     @Override
-                    public boolean areContentsTheSame(T oldItem, T newItem) {
+                    public boolean areContentsTheSame(@NonNull T oldItem, @NonNull T newItem) {
                         return oldItem.equals(newItem);
                     }
                 };

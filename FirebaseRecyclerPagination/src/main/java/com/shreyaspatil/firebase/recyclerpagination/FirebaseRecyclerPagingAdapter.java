@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.annotations.NotNull;
 import com.shreyaspatil.firebase.recyclerpagination.listener.StateChangedListener;
 
@@ -25,13 +26,17 @@ import java.util.ArrayList;
  */
 public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.ViewHolder> extends PagedListAdapter<T,VH> implements LifecycleObserver{
 
-    private final String TAG = "PagingAdapter";
+    private final String TAG = "FirebaseRecyclerPagingAdapter";
+
     private final LiveData<PagedList<T>> mPagedList;
     private final LiveData<LoadingState> mLoadingState;
     private final LiveData<ArrayList<String>> mKeyListLiveData;
+    private final LiveData<DatabaseError> mDatabaseError;
     private final LiveData<FirebaseDataSource> mDataSource;
+
     private StateChangedListener mListener;
     private ArrayList<String> mKeyList;
+    private DatabaseError mLastError;
 
     //State Observer
     private final Observer<LoadingState> mStateObserver = new Observer<LoadingState>() {
@@ -46,7 +51,7 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
                 case LOADED: mListener.onLoaded(); break;
                 case LOADING_MORE: mListener.onLoading(); break;
                 case FINISHED: mListener.onFinished(); break;
-                case ERROR: mListener.onError();break;
+                case ERROR: mListener.onError(mLastError);break;
             }
         }
     };
@@ -69,6 +74,15 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
             mKeyList = keyList;
         }
     };
+
+    //DatabaseError Observer
+    private final Observer<DatabaseError> mErrorObserver = new Observer<DatabaseError>() {
+        @Override
+        public void onChanged(@Nullable DatabaseError databaseError) {
+            mLastError = databaseError;
+        }
+    };
+
     /**
      * Construct a new FirestorePagingAdapter from the given {@link FirebasePagingOptions}.
      */
@@ -106,6 +120,16 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
                     }
                 });
 
+        //Init Database Error
+        mDatabaseError = Transformations.switchMap(mPagedList,
+                new Function<PagedList<T>, LiveData<DatabaseError>>() {
+                    @Override
+                    public LiveData<DatabaseError> apply(PagedList<T> input) {
+                        FirebaseDataSource dataSource = (FirebaseDataSource) input.getDataSource();
+                        return dataSource.getLastError();
+                    }
+                });
+
         if (options.getOwner() != null) {
             options.getOwner().getLifecycle().addObserver(this);
         }
@@ -120,6 +144,7 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
         mPagedList.observeForever(mDataObserver);
         mLoadingState.observeForever(mStateObserver);
         mKeyListLiveData.observeForever(mKeysObserver);
+        mDatabaseError.observeForever(mErrorObserver);
     }
 
     /**
@@ -131,6 +156,7 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
         mPagedList.removeObserver(mDataObserver);
         mLoadingState.removeObserver(mStateObserver);
         mKeyListLiveData.removeObserver(mKeysObserver);
+        mDatabaseError.removeObserver(mErrorObserver);
     }
 
     @Override

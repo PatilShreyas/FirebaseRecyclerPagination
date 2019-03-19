@@ -16,7 +16,8 @@
         app:cardBackgroundColor="#FFFFF8FA"
         android:clickable="true"
         android:foreground="?android:selectableItemBackground"
-        app:cardElevation="1dp">
+        app:cardElevation="1dp"
+        android:focusable="true">
 
         <LinearLayout
             android:layout_width="match_parent"
