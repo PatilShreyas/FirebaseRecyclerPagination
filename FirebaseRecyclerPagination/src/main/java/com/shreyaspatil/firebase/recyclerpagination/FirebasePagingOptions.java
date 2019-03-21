@@ -64,7 +64,7 @@ public final class FirebasePagingOptions<T> {
          */
         @NonNull
         public Builder<T> setQuery(@NonNull Query query, @NonNull PagedList.Config config, @NonNull Class<T> modelClass) {
-            FirebaseDataSource.Factory factory = new FirebaseDataSource.Factory(query,modelClass);
+            FirebaseDataSource.Factory factory = new FirebaseDataSource.Factory(query, modelClass);
             mData = new LivePagedListBuilder<>(factory, config).build();
             return this;
         }
@@ -122,5 +122,4 @@ public final class FirebasePagingOptions<T> {
         }
 
     }
-
 }

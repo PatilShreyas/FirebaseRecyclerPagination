@@ -7,7 +7,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 2
-        versionName "0.6-beta"
+        versionName "0.7-dev"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -61,7 +61,7 @@ ext {
     gitUrl = 'https://github.com/patilshreyas/FirebaseRecyclerPagination.git'
     githubRepository= 'patilshreyas/FirebaseRecyclerPagination'
 
-    libraryVersion = '0.6-beta'
+    libraryVersion = '0.7-dev'
 
     developerId = 'patilshreyas'
     developerName = 'Shreyas Patil'

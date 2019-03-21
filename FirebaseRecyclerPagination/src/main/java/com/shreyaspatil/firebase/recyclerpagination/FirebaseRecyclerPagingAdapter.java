@@ -12,7 +12,6 @@ import android.arch.paging.PagedListAdapter;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.annotations.NotNull;
 import com.shreyaspatil.firebase.recyclerpagination.listener.StateChangedListener;
@@ -24,7 +23,7 @@ import java.util.ArrayList;
  *
  * Configured with {@link FirebasePagingOptions}.
  */
-public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.ViewHolder> extends PagedListAdapter<T,VH> implements LifecycleObserver{
+public abstract class FirebaseRecyclerPagingAdapter<T, VH extends RecyclerView.ViewHolder> extends PagedListAdapter<T, VH> implements LifecycleObserver{
 
     private final String TAG = "FirebaseRecyclerPagingAdapter";
 
@@ -51,7 +50,7 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
                 case LOADED: mListener.onLoaded(); break;
                 case LOADING_MORE: mListener.onLoading(); break;
                 case FINISHED: mListener.onFinished(); break;
-                case ERROR: mListener.onError(mLastError);break;
+                case ERROR: mListener.onError(mLastError); break;
             }
         }
     };
@@ -86,7 +85,7 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
     /**
      * Construct a new FirestorePagingAdapter from the given {@link FirebasePagingOptions}.
      */
-    public FirebaseRecyclerPagingAdapter(FirebasePagingOptions options){
+    public FirebaseRecyclerPagingAdapter(@NonNull FirebasePagingOptions<T> options){
         super(options.getDiffCallback());
 
         mPagedList = options.getData();
@@ -177,7 +176,7 @@ public abstract class FirebaseRecyclerPagingAdapter<T,VH extends RecyclerView.Vi
      *
      * When the state is {@link LoadingState#ERROR} the adapter will stop loading any data
      */
-    public void setStateChangedListener(StateChangedListener mListener){
+    public void setStateChangedListener(@NonNull StateChangedListener mListener){
         this.mListener = mListener;
     }
 

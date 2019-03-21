@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private DatabaseReference mDatabase;
 
-    FirebaseRecyclerPagingAdapter<Post, ItemViewHolder> mAdapter;
+    FirebaseRecyclerPagingAdapter<Post, PostViewHolder> mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +60,18 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         //Initialize Adapter
-        mAdapter = new FirebaseRecyclerPagingAdapter<Post, ItemViewHolder>(options) {
+        mAdapter = new FirebaseRecyclerPagingAdapter<Post, PostViewHolder>(options) {
             @NonNull
             @Override
-            public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new ItemViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false));
+            public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new PostViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_list, parent, false));
             }
 
             @Override
-            protected void onBindViewHolder(@NonNull ItemViewHolder holder, int position, @NonNull String key, @NotNull Post model) {
+            protected void onBindViewHolder(@NonNull PostViewHolder holder,
+                                            int position,
+                                            @NonNull String key,
+                                            @NotNull Post model) {
                 holder.setItem(model);
             }
         };
@@ -101,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(DatabaseError databaseError) {
-                Log.e("ERRORDB",databaseError.getMessage());
+                databaseError.toException().printStackTrace();
             }
         });
 
@@ -113,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
 
     //Start Listening Adapter
     @Override

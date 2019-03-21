@@ -23,7 +23,7 @@ import java.util.ArrayList;
  *       managing our own thread pool or requiring the user to pass us an executor.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
+public class FirebaseDataSource<T> extends PageKeyedDataSource<String, T> {
 
     private Query mQuery;
     private Class<T> mClass;
@@ -34,6 +34,10 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
     private final MutableLiveData<LoadingState> mLoadingState = new MutableLiveData<>();
     private final MutableLiveData<DatabaseError> mError = new MutableLiveData<>();
     private final MutableLiveData<ArrayList<String>> mKeyLiveData = new MutableLiveData<>();
+
+    private static final String WRONG_DATA_PATH_STATUS = "WRONG_PATH";
+    private static final String WRONG_DATA_PATH_MESSAGE = "WRONG DATA PATH";
+    private static final String WRONG_DATA_PATH_DETAILS = "Wrong Data Path is given. Data Child Not Found !";
 
     public static class Factory<T> extends DataSource.Factory<String, Class<T>> {
 
@@ -48,7 +52,7 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
         @Override
         @NonNull
         public DataSource<String, Class<T>> create() {
-            return new FirebaseDataSource(mQuery,mClass);
+            return new FirebaseDataSource(mQuery, mClass);
         }
     }
 
@@ -67,17 +71,22 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
         mInitQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<T> mDataList = new ArrayList<T>();
-                for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                    T data = ds.getValue(mClass);
-                    String key = ds.getKey();
-                    mKeyList.add(key);
-                    mDataList.add(data);
-                }
+                if (dataSnapshot.exists()) {
+                    ArrayList<T> mDataList = new ArrayList<T>();
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                        T data = ds.getValue(mClass);
+                        String key = ds.getKey();
+                        mKeyList.add(key);
+                        mDataList.add(data);
+                    }
 
-                //Initial Load Success
-                mLoadingState.postValue(LoadingState.LOADED);
-                callback.onResult(mDataList,mKeyList.get(mKeyList.size() - 1),mKeyList.get(mKeyList.size() - 1));
+                    //Initial Load Success
+                    mLoadingState.postValue(LoadingState.LOADED);
+                    callback.onResult(mDataList, mKeyList.get(mKeyList.size() - 1), mKeyList.get(mKeyList.size() - 1));
+                }
+                else {
+                    setWrongDataPathError();
+                }
             }
 
             @Override
@@ -100,36 +109,41 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
         mLoadingState.postValue(LoadingState.LOADING_MORE);
 
         //Load params.requestedLoadSize+1 because, first data item is getting ignored.
-        Query mNewQuery = mQuery.startAt(null,params.key).limitToFirst(params.requestedLoadSize+1);
+        Query mNewQuery = mQuery.startAt(null, params.key).limitToFirst(params.requestedLoadSize + 1);
         mNewQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<T> mList = new ArrayList<T>();
-                boolean isFirstItem = true;
+                if (dataSnapshot.exists()) {
+                    ArrayList<T> mList = new ArrayList<T>();
+                    boolean isFirstItem = true;
 
-                for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                    T data = ds.getValue(mClass);
-                    String key = ds.getKey();
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                        T data = ds.getValue(mClass);
+                        String key = ds.getKey();
 
                     /*
                       Check for first Item.
                       Because in Firebase Database there is no query for startAfter(key).
                       So we're ignoring first data item
                     */
-                     if(!isFirstItem) {
-                        mList.add(data);
-                        mKeyList.add(key);
+                        if (!isFirstItem) {
+                            mList.add(data);
+                            mKeyList.add(key);
+                        }
+                        isFirstItem = false;
                     }
-                    isFirstItem = false;
+
+                    mLoadingState.postValue(LoadingState.LOADED);
+
+                    //Detect End of Data
+                    if (mList.isEmpty())
+                        mLoadingState.postValue(LoadingState.FINISHED);
+
+                    callback.onResult(mList, mKeyList.get(mKeyList.size() - 1));
                 }
-
-                mLoadingState.postValue(LoadingState.LOADED);
-
-                //Detect End of Data
-                if(mList.isEmpty())
-                    mLoadingState.postValue(LoadingState.FINISHED);
-
-                callback.onResult(mList,mKeyList.get(mKeyList.size() - 1));
+                else {
+                   setWrongDataPathError();
+                }
 
             }
 
@@ -141,16 +155,27 @@ public class FirebaseDataSource<T> extends PageKeyedDataSource<String,T> {
         });
     }
 
+    private void setWrongDataPathError(){
+        mError.postValue(DatabaseError.fromStatus(
+                WRONG_DATA_PATH_STATUS,
+                WRONG_DATA_PATH_DETAILS,
+                WRONG_DATA_PATH_MESSAGE));
+
+        mLoadingState.postValue(LoadingState.ERROR);
+    }
+
     @NonNull
     public LiveData<LoadingState> getLoadingState() {
         return mLoadingState;
     }
 
+    @NonNull
     public LiveData<ArrayList<String>> getKeyList(){
         mKeyLiveData.postValue(mKeyList);
         return mKeyLiveData;
     }
 
+    @NonNull
     public LiveData<DatabaseError> getLastError(){
         return mError;
     }
