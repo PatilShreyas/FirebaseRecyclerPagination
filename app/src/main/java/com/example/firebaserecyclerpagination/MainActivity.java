@@ -19,9 +19,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.annotations.NotNull;
-import com.shreyaspatil.firebase.recyclerpagination.FirebasePagingOptions;
+import com.shreyaspatil.firebase.recyclerpagination.DatabasePagingOptions;
 import com.shreyaspatil.firebase.recyclerpagination.FirebaseRecyclerPagingAdapter;
-import com.shreyaspatil.firebase.recyclerpagination.listener.StateChangedListener;
+import com.shreyaspatil.firebase.recyclerpagination.LoadingState;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         //Initialize FirebasePagingOptions
-        FirebasePagingOptions<Post> options = new FirebasePagingOptions.Builder<Post>()
+        DatabasePagingOptions<Post> options = new DatabasePagingOptions.Builder<Post>()
                 .setLifecycleOwner(this)
                 .setQuery(mDatabase, config, Post.class)
                 .build();
@@ -70,42 +70,41 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(@NonNull PostViewHolder holder,
                                             int position,
-                                            @NonNull String key,
-                                            @NotNull Post model) {
+                                            @NonNull Post model) {
                 holder.setItem(model);
+            }
+
+            @Override
+            protected void onLoadingStateChanged(@NonNull LoadingState state) {
+                switch (state) {
+                    case LOADING_INITIAL:
+                    case LOADING_MORE:
+                        // Do your loading animation
+                        break;
+
+                    case LOADED:
+                        // Stop Animation
+                        break;
+
+                    case FINISHED:
+                        //Reached end of Data set
+                        break;
+
+                    case ERROR:
+                        //Error Occurred
+                        break;
+                }
+            }
+
+            @Override
+            protected void onError(@NonNull DatabaseError databaseError) {
+                super.onError(databaseError);
+                databaseError.toException().printStackTrace();
             }
         };
 
         //Set Adapter to RecyclerView
         mRecyclerView.setAdapter(mAdapter);
-
-        //Paging Event Listener for State of RecyclerView
-        mAdapter.setStateChangedListener(new StateChangedListener() {
-            @Override
-            public void onInitLoading() {
-
-            }
-
-            @Override
-            public void onLoading() {
-
-            }
-
-            @Override
-            public void onLoaded() {
-
-            }
-
-            @Override
-            public void onFinished() {
-
-            }
-
-            @Override
-            public void onError(DatabaseError databaseError) {
-                databaseError.toException().printStackTrace();
-            }
-        });
 
         findViewById(R.id.fab_add).setOnClickListener(new View.OnClickListener() {
             @Override

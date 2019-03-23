@@ -22,12 +22,15 @@ dependencies {
     //Firebase Database
     implementation 'com.google.firebase:firebase-database:16.1.0'
     implementation 'com.google.firebase:firebase-core:16.0.7'
+    
+    //Firebase-UI Library
+    implementation 'com.firebaseui:firebase-ui-database:4.3.1'
 
     //Android Paging Libray
     implementation "android.arch.paging:runtime:1.0.1"
 
     //Firebase Pagination Library
-    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.7-dev'
+    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.7.1-beta'
 }
 ```
 ### App Setup
@@ -94,7 +97,7 @@ First of all configure PagedList <br>
 Then Configure Adapter by building FirebasePagingOptions. It will generic. <br>
 *Remember one thing, don't pass Query with `orderByKey()`, `limitToFirst()` or `limitToLast()`. This will cause an error.*
 ```java
-FirebasePagingOptions<Post> options = new FirebasePagingOptions.Builder<Post>()
+ DatabasePagingOptions<Post> options = new DatabasePagingOptions.Builder<Post>()
                 .setLifecycleOwner(this)
                 .setQuery(mDatabase, config, Post.class)
                 .build();
@@ -115,12 +118,55 @@ You can obtain key of Data model using `key`.
             @Override
             protected void onBindViewHolder(@NonNull PostViewHolder holder,
                                          int position,
-                                         @NonNull String key,
-                                         @NotNull Post model) {
+                                         @NonNull Post model) {
 
                 holder.setItem(model);
             }
+            
+            @Override
+            protected void onLoadingStateChanged(@NonNull LoadingState state) {
+                switch (state) {
+                    case LOADING_INITIAL:
+                    case LOADING_MORE:
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        break;
+                        
+                    case LOADED:
+                        mProgressBar.setVisibility(View.GONE);
+                        break;
+                        
+                    case FINISHED:
+                        mProgressBar.setVisibility(View.GONE);
+                        break;
+                        
+                    case ERROR:
+                        break;
+                }
+            }
         };
+```
+
+#### Get Child Reference
+To get reference of child from list, `FirebaseRecyclerPagingAdapter` has method called `getRef()`. You can obtain `DatabaseReference` of child using it. <br>
+Get it using `FirebaseRecyclerPagingAdapter#getRef()`
+For e.g.
+```java
+            @Override
+            protected void onBindViewHolder(@NonNull PostViewHolder holder,
+                                         int position,
+                                         @NonNull Post model) {
+                
+                DatabaseReference reference = getRef(position);
+            }
+```
+#### Error Handling
+To get to know about `DatabaseError` caught during Paging, Override `onError()` method in adapter.
+```java
+            @Override
+            protected void onError(@NonNull DatabaseError databaseError) {
+                databaseError.toException().printStackTrace();
+                // Handle Error
+            }
 ```
 
 #### Set Adapter
@@ -129,37 +175,6 @@ Finally, Set adapter to RecyclerView.
         mRecyclerView.setAdapter(mAdapter);
 ```
 
-#### Listener for Paging events
-This is optional. After setting up the StateChangedListener it will respond to changes in RecyclerView events.
-```java
-        mAdapter.setStateChangedListener(new StateChangedListener() {
-               @Override
-               public void onInitLoading() {
-                   //First Time Loading. Do Animation
-               }
-
-               @Override
-               public void onLoading() {
-                   //When Loading Every Time. Do Animation
-               }
-
-               @Override
-               public void onLoaded() {
-                   //When Items are loaded in RecyclerView
-               }
-
-               @Override
-               public void onFinished() {
-                   //When Items are fully loaded. List Ends.
-               }
-
-               @Override
-               public void onError(DatabaseError databaseError) {
-                   //When Error is Occured.
-                   databaseError.toException().printStackTrace();
-               }
-           });
-```
 
 #### Lifecycle
 At last, To begin populating data, call `startListening()` method. `stopListening()` stops the data being loaded.
