@@ -1,9 +1,15 @@
 {
 	"name": "Firebase Recycler Pagination",
-	"platforms": ["Android"],
+	"type": "library",
+	
+	"platforms": [
+      		"Android"
+    	],
+	
 	"content": "README.md",
 	"pages": {
 		"app/README.md": "Sample App"
 	},
-	"related": []
+	
+	"related": ["firebase/FirebaseUI-Android"]
 }
