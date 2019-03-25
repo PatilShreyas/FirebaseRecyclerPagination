@@ -30,7 +30,7 @@ dependencies {
     implementation "android.arch.paging:runtime:1.0.1"
 
     //Firebase Pagination Library
-    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.7.1-beta'
+    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.7.2'
 }
 ```
 ### App Setup
@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private DatabaseReference mDatabase;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     FirebaseRecyclerPagingAdapter<Post, PostViewHolder> mAdapter;
 ```
 
@@ -69,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
            super.onCreate(savedInstanceState);
            setContentView(R.layout.activity_main);
 
+           mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+ 
            //Initialize RecyclerView
            mRecyclerView = findViewById(R.id.recycler_view);
            mRecyclerView.setHasFixedSize(true);
@@ -128,21 +132,24 @@ You can obtain key of Data model using `key`.
                 switch (state) {
                     case LOADING_INITIAL:
                     case LOADING_MORE:
-                        mProgressBar.setVisibility(View.VISIBLE);
+                        // Do your loading animation
+                        mSwipeRefreshLayout.setRefreshing(true);
                         break;
-                        
+
                     case LOADED:
-                        mProgressBar.setVisibility(View.GONE);
+                        // Stop Animation
+                        mSwipeRefreshLayout.setRefreshing(false);
                         break;
-                        
+
                     case FINISHED:
-                        mProgressBar.setVisibility(View.GONE);
+                        //Reached end of Data set
+                        mSwipeRefreshLayout.setRefreshing(false);
                         break;
-                        
+
                     case ERROR:
+                        retry();
                         break;
                 }
-            }
         };
 ```
 
@@ -164,9 +171,45 @@ To get to know about `DatabaseError` caught during Paging, Override `onError()` 
 ```java
             @Override
             protected void onError(@NonNull DatabaseError databaseError) {
+                mSwipeRefreshLayout.setRefreshing(false);
                 databaseError.toException().printStackTrace();
                 // Handle Error
+              
             }
+```
+#### Retrying List (After Error / Failure)
+To retry items loading in RecyclerView, `retry()` method from Adapter class is used. <br>
+Use it as `FirebaseRecyclerPagingAdapter#retry()`. <br>
+This method should used only after caught in Error. `retry()` should not be invoked anytime other than ERROR state. <br>
+Whenever `LoadingState` becomes `LoadingState.ERROR` we can use `retry()` to load items in RecyclerView which were unable to load due to recent failure/error and to maintain Paging List stable.<br>
+See demo for method.
+
+```java
+        @Override
+        protected void onError(@NonNull DatabaseError databaseError) {
+            retry();          
+        }
+```
+
+Or outside `FirebaseRecyclerPagingAdapter`
+
+```java
+        mAdapter.retry();
+```
+
+#### Refreshing List
+To refresh items in RecyclerView, `refresh()` method from Adapter class is used. <br>
+Use it as `FirebaseRecyclerPagingAdapter#refresh()`. <br>
+This method clears all the items in RecyclerView and reloads the data again from beginning. <br>
+See demo for method.
+
+```java
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mAdapter.refresh();
+            }
+        });
 ```
 
 #### Set Adapter
@@ -194,4 +237,4 @@ At last, To begin populating data, call `startListening()` method. `stopListenin
     }
 ```
 Thus, we have implemented Firebase Recycler Pagination.
-Thank You !
+***Thank You !***

@@ -5,6 +5,7 @@ import android.arch.paging.PagedList;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,7 +19,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.annotations.NotNull;
 import com.shreyaspatil.firebase.recyclerpagination.DatabasePagingOptions;
 import com.shreyaspatil.firebase.recyclerpagination.FirebaseRecyclerPagingAdapter;
 import com.shreyaspatil.firebase.recyclerpagination.LoadingState;
@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private DatabaseReference mDatabase;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     FirebaseRecyclerPagingAdapter<Post, PostViewHolder> mAdapter;
 
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
 
         //Initialize RecyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
@@ -80,18 +83,21 @@ public class MainActivity extends AppCompatActivity {
                     case LOADING_INITIAL:
                     case LOADING_MORE:
                         // Do your loading animation
+                        mSwipeRefreshLayout.setRefreshing(true);
                         break;
 
                     case LOADED:
                         // Stop Animation
+                        mSwipeRefreshLayout.setRefreshing(false);
                         break;
 
                     case FINISHED:
                         //Reached end of Data set
+                        mSwipeRefreshLayout.setRefreshing(false);
                         break;
 
                     case ERROR:
-                        //Error Occurred
+                        retry();
                         break;
                 }
             }
@@ -99,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onError(@NonNull DatabaseError databaseError) {
                 super.onError(databaseError);
+                mSwipeRefreshLayout.setRefreshing(false);
                 databaseError.toException().printStackTrace();
             }
         };
@@ -106,6 +113,15 @@ public class MainActivity extends AppCompatActivity {
         //Set Adapter to RecyclerView
         mRecyclerView.setAdapter(mAdapter);
 
+        //Set listener to SwipeRefreshLayout for refresh action
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mAdapter.refresh();
+            }
+        });
+
+        //Show Dialog to add Items in Database
         findViewById(R.id.fab_add).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
