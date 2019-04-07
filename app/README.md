@@ -35,7 +35,7 @@ dependencies {
 ```
 ### App Setup
 In this app, you are showing paginated list of Posts. Posts will load in `RecyclerView`
-#### Data Model Class (Post.class)
+#### Data Model Class (Post.java)
 ```java
 public class Post {
     public String title;
