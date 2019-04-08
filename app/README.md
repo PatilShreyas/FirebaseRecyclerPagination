@@ -2,7 +2,7 @@
 Here is sample app demonstrating features of `FirebaseRecyclerPagination` library.
 Output will be as following GIF.
 
-![](screengif.gif)
+<img src="screengif.gif" height="500">
 
 ## Getting Started
 
