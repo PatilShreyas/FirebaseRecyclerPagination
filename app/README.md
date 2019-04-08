@@ -108,8 +108,7 @@ Then Configure Adapter by building FirebasePagingOptions. It will generic. <br>
 ```
 #### Init Adapter
 `FirebaseRecyclerPagingAdapter` is built on the top of Android Architecture Components - Paging Support Library.
-To implement, you should already have `RecyclerView.ViewHolder` subclass. Here We used `PostViewHolder` class. <br>
-You can obtain key of Data model using `key`.
+To implement, you should already have `RecyclerView.ViewHolder` subclass. Here We used `PostViewHolder` class.
 
 ```java
         mAdapter = new FirebaseRecyclerPagingAdapter<Post, PostViewHolder>(options) {
