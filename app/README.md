@@ -14,6 +14,12 @@ Output will be as following GIF.
 ```
 ### Gradle Setup
 ```groovy
+repositories{
+    maven {
+        url 'https://dl.bintray.com/patilshreyas/maven/'
+    }
+}
+
 dependencies {
 
     //RecyclerView
@@ -30,7 +36,7 @@ dependencies {
     implementation "android.arch.paging:runtime:1.0.1"
 
     //Firebase Pagination Library
-    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.7.2'
+    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:1.0.1'
 }
 ```
 ### App Setup

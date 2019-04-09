@@ -23,12 +23,18 @@ allprojects {
 ```
 Open [`Build.gradle`](app/build.gradle) file of `app` module and then..
 ```groovy
+repositories{
+    maven {
+        url 'https://dl.bintray.com/patilshreyas/maven/'
+    }
+}
+
 dependencies {
     //Android Paging Libray
     implementation "android.arch.paging:runtime:1.0.1"
 
     //Firebase Pagination Library
-    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:0.7.2'
+    implementation 'com.shreyaspatil:FirebaseRecyclerPagination:1.0.1'
 }
 ```
 
