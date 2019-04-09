@@ -90,11 +90,11 @@ public class MainActivity extends AppCompatActivity {
            mDatabase = FirebaseDatabase.getInstance().getReference().child("posts");
 
 ```
-Dont Forgot to set `LayoutManager` to the RecyclerView.<br>
+Don't forget to set `LayoutManager` to the RecyclerView.<br>
 Set it using `RecyclerView#setLayoutManager()`
 
 #### Setup Configuration for PagedList
-First of all configure PagedList <br>
+First of all configure a PagedList <br>
 *Remember that, the size you will pass to `setPageSize()` method will load x3 items of that size.*
 ```java
         PagedList.Config config = new PagedList.Config.Builder()
@@ -159,7 +159,7 @@ To implement, you should already have `RecyclerView.ViewHolder` subclass. Here W
 ```
 
 #### Get Child Reference
-To get reference of child from list, `FirebaseRecyclerPagingAdapter` has method called `getRef()`. You can obtain `DatabaseReference` of child using it. <br>
+To get the reference of child from list, `FirebaseRecyclerPagingAdapter` has method called `getRef()`. You can obtain `DatabaseReference` of the child using it. <br>
 Get it using `FirebaseRecyclerPagingAdapter#getRef()`
 For e.g.
 ```java
@@ -185,7 +185,7 @@ To get to know about `DatabaseError` caught during Paging, Override `onError()` 
 #### Retrying List (After Error / Failure)
 To retry items loading in RecyclerView, `retry()` method from Adapter class is used. <br>
 Use it as `FirebaseRecyclerPagingAdapter#retry()`. <br>
-This method should used only after caught in Error. `retry()` should not be invoked anytime other than ERROR state. <br>
+This method should be used only after caught in Error. `retry()` should not be invoked anytime other than ERROR state. <br>
 Whenever `LoadingState` becomes `LoadingState.ERROR` we can use `retry()` to load items in RecyclerView which were unable to load due to recent failure/error and to maintain Paging List stable.<br>
 See demo for method.
 
