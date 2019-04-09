@@ -35,7 +35,10 @@ public abstract class FirebaseRecyclerPagingAdapter<T, VH extends RecyclerView.V
     private final LiveData<FirebaseDataSource> mDataSource;
 
 
-    //Data Source Observer
+    /*
+        LiveData created via Transformation do not have a value until an Observer is attached.  
+        We attach this empty observer so that our getValue() calls return non-null later.
+    */
     private final Observer<FirebaseDataSource> mDataSourceObserver = new Observer<FirebaseDataSource>() {
         @Override
         public void onChanged(@Nullable FirebaseDataSource source) {
@@ -193,9 +196,17 @@ public abstract class FirebaseRecyclerPagingAdapter<T, VH extends RecyclerView.V
      * When {@link DatabaseError} is caught the adapter will stop loading any data
      */
     protected void onError(@NonNull DatabaseError databaseError){
-        databaseError.toException().printStackTrace();
+
     }
 
+    /**
+     * Returns the reference at the specified position in this list.
+     *
+     * @param position index of the reference to return
+     * @return the snapshot at the specified position in this list
+     * @throws IndexOutOfBoundsException if the index is out of range (<tt>index &lt; 0 || index
+     *                                   &gt;= size()</tt>)
+     */
     @NonNull
     public DatabaseReference getRef(int position){
        return getItem(position).getRef();

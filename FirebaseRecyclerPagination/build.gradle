@@ -1,4 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: "com.jfrog.bintray"
+
+version = "1.0.1"
 
 android {
     compileSdkVersion 28
@@ -7,7 +11,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 3
-        versionName "0.7.2"
+        versionName version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -47,6 +51,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
+
 ext {
     bintrayRepo = 'maven'
     bintrayName = 'FirebaseRecyclerPagination'
@@ -62,7 +67,7 @@ ext {
     gitUrl = 'https://github.com/patilshreyas/FirebaseRecyclerPagination.git'
     githubRepository= 'patilshreyas/FirebaseRecyclerPagination'
 
-    libraryVersion = '0.7.2'
+    libraryVersion = version
 
     developerId = 'patilshreyas'
     developerName = 'Shreyas Patil'
@@ -72,5 +77,96 @@ ext {
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     allLicenses = ["Apache-2.0"]
 }
-apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/bintrayv1.gradle'
+
+group = publishedGroupId
+def siteUrl = 'https://github.com/PatilShreyas/FirebaseRecyclerPagination'      // Homepage URL of the library
+def gitUrl = 'https://github.com/PatilShreyas/FirebaseRecyclerPagination.git'   // Git repository URL // Maven Group ID for the artifact
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                // Add your description here
+                groupId 'com.shreyaspatil'
+                artifactId = 'FirebaseRecyclerPagination'
+                name 'FirebaseRecyclerPagingation' // TODO
+                description = 'Android Library to implement Pagination in Firebase Realtime Database with RecyclerView' // TODO
+                url siteUrl
+
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'PatilShreyas' // TODO
+                        name 'Shreyas Patil' // TODO
+                        email 'shreyaspatilg@gmail.com' // TODO
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+// https://github.com/bintray/gradle-bintray-plugin
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        // it is the name that appears in bintray when logged
+        name = "com.shreyaspatil:FirebaseRecyclerPagination" // TODO
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+        version {
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+            }
+        }
+    }
+}
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'

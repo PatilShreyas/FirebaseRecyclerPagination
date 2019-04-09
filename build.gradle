@@ -11,7 +11,7 @@ buildscript {
         classpath 'com.google.gms:google-services:4.2.0'
 
         // Required plugins added to classpath to facilitate pushing to Jcenter/Bintray
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
     }
 }
@@ -20,9 +20,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        tasks.withType(Javadoc).all {
-            enabled = false
-        }
     }
 }
 

@@ -27,7 +27,6 @@ import java.util.List;
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot> {
-
     private static final String TAG = "FirebaseDataSource";
 
     private Query mQuery;
@@ -35,9 +34,9 @@ public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot
     private final MutableLiveData<LoadingState> mLoadingState = new MutableLiveData<>();
     private final MutableLiveData<DatabaseError> mError = new MutableLiveData<>();
 
-    private static final String STATUS_DATABASE_NOT_FOUND = "DATABASE NOT FOUND";
-    private static final String MESSAGE_DATABASE_NOT_FOUND = "Database not found at given child path !";
-    private static final String DETAILS_DATABASE_NOT_FOUND = "Database Children Not Found in the specified child path. Please specify correct child path/reference";
+    private static final String STATUS_DATABASE_NOT_FOUND = "DATA_NOT_FOUND";
+    private static final String MESSAGE_DATABASE_NOT_FOUND = "Data not found at given child path!";
+    private static final String DETAILS_DATABASE_NOT_FOUND = "No data was returned for the given query: ";
 
     private Runnable mRetryRunnable;
 
@@ -63,6 +62,7 @@ public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot
     @Override
     public void loadInitial(@NonNull final LoadInitialParams<String> params,
                             @NonNull final LoadInitialCallback<String, DataSnapshot> callback) {
+
         // Set initial loading state
         mLoadingState.postValue(LoadingState.LOADING_INITIAL);
 
@@ -119,8 +119,8 @@ public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot
         mNewQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
                 if (dataSnapshot.exists()) {
+
                     //Make List of DataSnapshot
                     List<DataSnapshot> data = new ArrayList<>();
                     String lastKey = null;
@@ -128,8 +128,9 @@ public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot
                     Iterator<DataSnapshot> iterator = dataSnapshot.getChildren().iterator();
 
                     //Skip First Item
-                    if (iterator.hasNext())
+                    if (iterator.hasNext()) {
                         iterator.next();
+                    }
 
                     while (iterator.hasNext()) {
                         DataSnapshot snapshot = iterator.next();
@@ -152,8 +153,9 @@ public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot
 
                 } else {
                     mRetryRunnable = getRetryLoadAfter(params, callback);
-                   setDatabaseNotFoundError();
+                    setDatabaseNotFoundError();
                 }
+
             }
 
             @Override
@@ -186,29 +188,6 @@ public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot
         };
     }
 
-    @Nullable
-    private String getLastPageKey(@NonNull List<DataSnapshot> data) {
-        if (data.isEmpty()) {
-            return null;
-        } else {
-            return data.get(data.size() - 1).getKey();
-        }
-    }
-
-    private void setDatabaseNotFoundError(){
-        mError.postValue(DatabaseError.fromStatus(
-                STATUS_DATABASE_NOT_FOUND,
-                DETAILS_DATABASE_NOT_FOUND,
-                MESSAGE_DATABASE_NOT_FOUND));
-
-        mLoadingState.postValue(LoadingState.ERROR);
-    }
-
-    private void setError(DatabaseError databaseError){
-        mError.postValue(databaseError);
-        mLoadingState.postValue(LoadingState.ERROR);
-    }
-
     public void retry() {
         LoadingState currentState = mLoadingState.getValue();
         if (currentState != LoadingState.ERROR) {
@@ -224,6 +203,30 @@ public class FirebaseDataSource extends PageKeyedDataSource<String, DataSnapshot
         mRetryRunnable.run();
     }
 
+
+    @Nullable
+    private String getLastPageKey(@NonNull List<DataSnapshot> data) {
+        if (data.isEmpty()) {
+            return null;
+        } else {
+            return data.get(data.size() - 1).getKey();
+        }
+    }
+
+    private void setDatabaseNotFoundError(){
+        String details = DETAILS_DATABASE_NOT_FOUND + mQuery.toString();
+        mError.postValue(DatabaseError.fromStatus(
+                STATUS_DATABASE_NOT_FOUND,
+                MESSAGE_DATABASE_NOT_FOUND,
+                details));
+
+        mLoadingState.postValue(LoadingState.ERROR);
+    }
+
+    private void setError(DatabaseError databaseError){
+        mError.postValue(databaseError);
+        mLoadingState.postValue(LoadingState.ERROR);
+    }
 
     @NonNull
     public LiveData<LoadingState> getLoadingState() {
