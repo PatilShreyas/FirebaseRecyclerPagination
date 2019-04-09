@@ -1,5 +1,9 @@
 # **Firebase Recycler Pagination**
 
+[![FirebaseOpensource.com](https://img.shields.io/badge/Docs-firebaseopensource.com-orange.svg)](
+https://firebaseopensource.com/projects/patilshreyas/firebaserecyclerpagination/
+)
+
 Here is Android library to implement *Pagination* of Firebase Realtime Database in `RecyclerView`.
 
 ## Sample App
