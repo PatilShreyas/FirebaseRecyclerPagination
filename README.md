@@ -8,6 +8,7 @@ Here is Android library to implement *Pagination* of Firebase Realtime Database 
 
 ## Sample App
 The Sample app is available in [`app/`](app) directory that demonstrates feature of this library.
+Step by step description is given [`here`](app/README.md)
 
 ## Installation
 FirebaseRecyclerPagingation Library binds Firebase Realtime Database Query to a `RecyclerView` by loading Data in pages. `FirebaseRecyclerPagingAdapter` is built on top of Android Paging Support Library. Before using this adapter in your app, you will have to implement dependency on the support library.
@@ -27,12 +28,6 @@ allprojects {
 ```
 Open [`Build.gradle`](app/build.gradle) file of `app` module and then..
 ```groovy
-repositories{
-    maven {
-        url 'https://dl.bintray.com/patilshreyas/maven/'
-    }
-}
-
 dependencies {
     //Android Paging Libray
     implementation "android.arch.paging:runtime:1.0.1"

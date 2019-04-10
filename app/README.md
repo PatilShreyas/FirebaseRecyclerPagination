@@ -14,12 +14,6 @@ Output will be as following GIF.
 ```
 ### Gradle Setup
 ```groovy
-repositories{
-    maven {
-        url 'https://dl.bintray.com/patilshreyas/maven/'
-    }
-}
-
 dependencies {
 
     //RecyclerView
