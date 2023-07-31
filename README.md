@@ -1,6 +1,6 @@
 # **Firebase Recycler Pagination**
 
-## [DEPRECATED] This Library is now available officially in `FirebaseUI-Android` repo [here](https://github.com/firebase/FirebaseUI-Android). No need to use this library.
+## [ARCHIVED] This API is now available officially in `FirebaseUI-Android` repo [here](https://github.com/firebase/FirebaseUI-Android). No need to use this library.
 
 [![FirebaseOpensource.com](https://img.shields.io/badge/Docs-firebaseopensource.com-orange.svg)](
 https://firebaseopensource.com/projects/patilshreyas/firebaserecyclerpagination/
